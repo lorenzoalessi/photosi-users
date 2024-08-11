@@ -8,6 +8,10 @@ public class Context : DbContext
     {
     }
 
+    public Context(DbContextOptions options) : base(options)
+    {
+    }
+
     public virtual DbSet<User> User { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

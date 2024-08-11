@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PhotosiUsers.Model;
+using PhotosiUsers.Repository.User;
+using PhotosiUsers.Service;
 
 namespace PhotosiUsers;
 
@@ -16,6 +18,7 @@ public class Startup
     {
         _ = _builder.Services.AddControllers();
 
+        _builder.Services.AddAutoMapper(typeof(Startup));
         // Aggiungo servizi e repository al container di dependency injection.
         ConfigureServices(_builder.Services);
         ConfigureRepositories(_builder.Services);
@@ -43,15 +46,11 @@ public class Startup
 
     private void ConfigureServices(IServiceCollection services)
     {
-        _ = services
-            // .AddScoped<IUserService, UserService>()
-            ;
+        _ = services.AddScoped<IUserService, UserService>();
     }
 
     private void ConfigureRepositories(IServiceCollection services)
     {
-        _ = services
-            // .AddScoped<IUserRepository, UserRepository>()
-            ;
+        _ = services.AddScoped<IUserRepository, UserRepository>();
     }
 }
