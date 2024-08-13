@@ -5,11 +5,6 @@ namespace PhotosiUsers.xUnitTest.Repository;
 
 public class UserRepositoryTest : TestSetup
 {
-    public UserRepositoryTest()
-    {
-        SetUp();
-    }
-
     [Fact]
     public async Task GetAsync_ShouldReturnList_Always()
     {

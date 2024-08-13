@@ -6,11 +6,11 @@ namespace PhotosiUsers.xUnitTest;
 
 public abstract class TestSetup
 {
-    protected Context _context;
+    protected readonly Context _context;
 
-    protected Randomizer _faker;
+    protected readonly Randomizer _faker;
 
-    protected void SetUp()
+    protected TestSetup()
     {
         _faker = new Randomizer();
 

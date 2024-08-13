@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Moq;
-using PhotosiUsers.Dto;
+using PhotosiUsers.Mapper;
 using PhotosiUsers.Model;
 using PhotosiUsers.Repository.User;
 using PhotosiUsers.Service;
@@ -10,14 +10,18 @@ namespace PhotosiUsers.xUnitTest.Service;
 public class UserServiceTest : TestSetup
 {
     private readonly Mock<IUserRepository> _mockUserRepository;
-    private readonly Mock<IMapper> _mockIMapper;
+    private readonly IMapper _mapper;
 
     public UserServiceTest()
     {
-        SetUp();
-
         _mockUserRepository = new Mock<IUserRepository>();
-        _mockIMapper = new Mock<IMapper>();
+
+        var config = new MapperConfiguration(conf =>
+        {
+            conf.AddProfile(typeof(UserMapperProfile));
+        });
+        
+        _mapper = config.CreateMapper();
     }
 
     [Fact]
@@ -30,22 +34,9 @@ public class UserServiceTest : TestSetup
             .Select(_ => GenerateUser())
             .ToList();
 
-        var userDtos = users.Select(x => new UserDto()
-        {
-            Id = x.Id,
-            FirstName = x.FirstName,
-            LastName = x.LastName,
-            Username = x.Username,
-            Email = x.Email,
-            BirthDate = x.BirthDate
-        }).ToList();
-
         // Setup mock del repository
         _mockUserRepository.Setup(x => x.GetAsync())
             .ReturnsAsync(users);
-        
-        // Setup mock del mapper
-        _mockIMapper.Setup(m => m.Map<List<UserDto>>(users)).Returns(userDtos);
         
         // Act
         var result = await service.GetAsync();
@@ -76,7 +67,7 @@ public class UserServiceTest : TestSetup
         _mockUserRepository.Verify(x => x.GetAsync(), Times.Once);
     }
     
-    private IUserService GetService() => new UserService(_mockUserRepository.Object, _mockIMapper.Object);
+    private IUserService GetService() => new UserService(_mockUserRepository.Object, _mapper);
     
     private User GenerateUser()
     {
