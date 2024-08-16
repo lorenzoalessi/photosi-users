@@ -56,8 +56,5 @@ public class UserService : IUserService
         return userDto;
     }
 
-    public async Task<bool> DeleteAsync(int id)
-    {
-        return await _userRepository.DeleteAsync(id);
-    }
+    public async Task<bool> DeleteAsync(int id) => await _userRepository.DeleteAsync(id);
 }

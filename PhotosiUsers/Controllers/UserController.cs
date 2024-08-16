@@ -39,42 +39,25 @@ public class UserController : ControllerBase
             var result = await _userService.UpdateAsync(id, userDto);
             return Ok($"Utente con ID {result.Id} salvato successo");
         }
-        catch (Exception e) when (e is UserException)
+        catch (UserException e)
         {
             return BadRequest($"Errore nella richiesta di inserimento: {e.Message}");
         }
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] UserDto userDto)
-    {
-        try
-        {
-            return Ok(await _userService.AddAsync(userDto));
-        }
-        catch (UserException e)
-        {
-            return BadRequest($"Errore nella richiesta di inserimento: {e.Message}");
-        }
-    }
+    public async Task<IActionResult> Add([FromBody] UserDto userDto) => Ok(await _userService.AddAsync(userDto));
     
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         if (id < 1)
             return BadRequest("ID fornito non valido");
-
-        try
-        {
-            var deleted = await _userService.DeleteAsync(id);
-            if (!deleted)
-                return StatusCode(500, "Errore nella richiesta di eliminazione");
+        
+        var deleted = await _userService.DeleteAsync(id);
+        if (!deleted) 
+            return StatusCode(500, "Errore nella richiesta di eliminazione");
             
-            return Ok($"Utente con ID {id} eliminato con successo");
-        }
-        catch (UserException e)
-        {
-            return BadRequest($"Errore nella richiesta di eliminazione: {e.Message}");
-        }
+        return Ok($"Utente con ID {id} eliminato con successo");
     }
 }

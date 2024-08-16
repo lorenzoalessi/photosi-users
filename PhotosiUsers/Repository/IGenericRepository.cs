@@ -4,7 +4,7 @@ public interface IGenericRepository<TDbEntity>
 {
     Task<List<TDbEntity>> GetAsync();
     
-    Task<TDbEntity> GetByIdAsync(int id);
+    Task<TDbEntity?> GetByIdAsync(int id);
     
     Task<TDbEntity> AddAsync(TDbEntity dbEntity);
     
