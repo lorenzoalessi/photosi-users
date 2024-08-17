@@ -47,17 +47,31 @@ public class UserController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] UserDto userDto) => Ok(await _userService.AddAsync(userDto));
-    
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    {
+        try
+        {
+            return Ok(await _userService.LoginAsync(loginDto));
+        } 
+        catch (UserException e)
+        {
+            // Per questioni di sicurezza torno sempre un 500 con messaggio generico
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         if (id < 1)
             return BadRequest("ID fornito non valido");
-        
+
         var deleted = await _userService.DeleteAsync(id);
-        if (!deleted) 
+        if (!deleted)
             return StatusCode(500, "Errore nella richiesta di eliminazione");
-            
+
         return Ok($"Utente con ID {id} eliminato con successo");
     }
 }
