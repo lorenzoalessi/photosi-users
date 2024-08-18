@@ -11,7 +11,7 @@ public class UserMapperProfile: Profile
 {
     public UserMapperProfile()
     {
-        CreateMap<User, UserDto>()
+        CreateMap<UserDto, User>()
             // Password hashata
             .ForMember(x => x.Password, y => y.MapFrom(z => z.Password.ConvertToSha512()))
             .ReverseMap();
