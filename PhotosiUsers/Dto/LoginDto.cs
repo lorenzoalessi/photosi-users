@@ -1,5 +1,8 @@
-﻿namespace PhotosiUsers.Dto;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace PhotosiUsers.Dto;
+
+[ExcludeFromCodeCoverage]
 public class LoginDto
 {
     public string Username { get; set; }

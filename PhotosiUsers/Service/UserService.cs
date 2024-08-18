@@ -58,10 +58,10 @@ public class UserService : IUserService
 
     public async Task<UserDto> LoginAsync(LoginDto loginDto)
     {
-        var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
+        var user = await _userRepository.GetByUsernamePasswordAsync(loginDto.Username, loginDto.Password);
         // Se l'utente non esiste per lo username passato oppure la password è errata
         // lancio un'eccezione con un messaggio generico
-        if (user == null || user.Password != loginDto.Password)
+        if (user == null)
             throw new UserException("Username o password errate");
 
         return _mapper.Map<UserDto>(user);

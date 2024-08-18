@@ -1,5 +1,8 @@
-﻿namespace PhotosiUsers.Exceptions;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace PhotosiUsers.Exceptions;
+
+[ExcludeFromCodeCoverage]
 public class UserException : Exception
 {
     public UserException()

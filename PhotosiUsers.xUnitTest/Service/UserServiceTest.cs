@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Moq;
+using PhotosiUsers.Dto;
+using PhotosiUsers.Exceptions;
 using PhotosiUsers.Mapper;
 using PhotosiUsers.Model;
 using PhotosiUsers.Repository.User;
@@ -66,14 +68,205 @@ public class UserServiceTest : TestSetup
         
         _mockUserRepository.Verify(x => x.GetAsync(), Times.Once);
     }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnNull_IfNoUserFound()
+    {
+        // Arrange
+        var service = GetService();
+        var input = _faker.Int(1);
+        
+        // Act
+        var result = await service.GetByIdAsync(input);
+
+        // Assert
+        Assert.Null(result);
+        _mockUserRepository.Verify(x => x.GetByIdAsync(input), Times.Once);
+    }
+    
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnObject_IfUserFound()
+    {
+        // Arrange
+        var service = GetService();
+        var input = _faker.Int(1);
+        var user = GenerateUser();
+        
+        _mockUserRepository.Setup(x => x.GetByIdAsync(input))
+            .ReturnsAsync(user);
+        
+        // Act
+        var result = await service.GetByIdAsync(input);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(result.Id, user.Id);
+        Assert.Equal(result.FirstName, user.FirstName);
+        Assert.Equal(result.BirthDate, user.BirthDate);
+        Assert.Equal(result.Email, user.Email);
+        Assert.Equal(result.LastName, user.LastName);
+        Assert.Equal(result.Password, user.Password);
+        Assert.Equal(result.Username, user.Username);
+        _mockUserRepository.Verify(x => x.GetByIdAsync(input), Times.Once);
+    }
+
+    [Fact]
+    public void UpdateAsync_ShouldThrowException_IfUserNotFound()
+    {
+        // Arrange
+        var service = GetService();
+        var id = _faker.Int();
+        var userDto = GenerateUserDto();
+        
+        // Act
+        Assert.ThrowsAsync<UserException>(async () => await service.UpdateAsync(id, userDto));
+
+        // Assert
+        _mockUserRepository.Verify(x => x.GetByIdAsync(id), Times.Once);
+        _mockUserRepository.Verify(x => x.SaveAsync(), Times.Never);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateObject_IfUserFound()
+    {
+        // Arrange
+        var service = GetService();
+        var id = _faker.Int(1);
+        var userDto = GenerateUserDto(id);
+        var user = GenerateUser(id);
+        
+        _mockUserRepository.Setup(x => x.GetByIdAsync(id))
+            .ReturnsAsync(user);
+        
+        // Act
+        var result = await service.UpdateAsync(id, userDto);
+
+        // Assert
+        _mockUserRepository.Verify(x => x.GetByIdAsync(id), Times.Once);
+        _mockUserRepository.Verify(x => x.SaveAsync(), Times.Once);
+
+        Assert.NotNull(result);
+        Assert.Equal(id, result.Id);
+        Assert.Equal(userDto.FirstName, result.FirstName);
+        Assert.Equal(userDto.BirthDate, result.BirthDate);
+        Assert.Equal(userDto.Email, result.Email);
+        Assert.Equal(userDto.LastName, result.LastName);
+        Assert.Equal(userDto.Username, result.Username);
+        Assert.Equal(userDto.Password, result.Password);
+    }
+    
+    [Fact]
+    public async Task AddAsync_ShouldAddObject_Always()
+    {
+        // Arrange
+        var service = GetService();
+        var userDto = GenerateUserDto();
+        
+        // Act
+        var result = await service.AddAsync(userDto);
+
+        // Assert
+        _mockUserRepository.Verify(x => x.AddAsync(It.IsAny<User>()), Times.Once);
+
+        Assert.NotNull(result);
+        Assert.True(userDto.Id > 0);
+        Assert.Equal(userDto.FirstName, result.FirstName);
+        Assert.Equal(userDto.BirthDate, result.BirthDate);
+        Assert.Equal(userDto.Email, result.Email);
+        Assert.Equal(userDto.LastName, result.LastName);
+        Assert.Equal(userDto.Username, result.Username);
+        Assert.Equal(userDto.Password, result.Password);
+    }
+
+    [Fact]
+    public void LoginAsync_ShouldThrowException_IfUserNotFound()
+    {
+        // Arrange
+        var service = GetService();
+        var input = GenerateLoginDto();
+        
+        // Act
+        Assert.ThrowsAsync<UserException>(async () => await service.LoginAsync(input));
+        
+        // Assert
+        _mockUserRepository.Verify(x => x.GetByUsernamePasswordAsync(input.Username, input.Password), Times.Once);
+    }
+    
+    [Fact]
+    public async Task LoginAsync_ShouldReturnObject_IfUserFound()
+    {
+        // Arrange
+        var service = GetService();
+        var input = GenerateLoginDto();
+        var user = GenerateUser();
+        
+        _mockUserRepository.Setup(x => x.GetByUsernamePasswordAsync(input.Username, input.Password))
+            .ReturnsAsync(user);
+        
+        // Act
+        var result = await service.LoginAsync(input);
+        
+        // Assert
+        _mockUserRepository.Verify(x => x.GetByUsernamePasswordAsync(input.Username, input.Password), Times.Once);
+        Assert.NotNull(result);
+        Assert.Equal(user.Id, result.Id);
+        Assert.Equal(user.Password, result.Password);
+        Assert.Equal(user.FirstName, result.FirstName);
+        Assert.Equal(user.BirthDate, result.BirthDate);
+        Assert.Equal(user.Email, result.Email);
+        Assert.Equal(user.Username, result.Username);
+        Assert.Equal(user.LastName, result.LastName);
+    }
+    
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task DeleteAsync_ShouldReturnTrueOrFalse_IfAddressBookFoundedOrNot(bool founded)
+    {
+        // Arrange
+        var service = GetService();
+        var input = _faker.Int();
+
+        _mockUserRepository.Setup(x => x.DeleteAsync(input))
+            .ReturnsAsync(founded);
+        
+        // Act
+        var result = await service.DeleteAsync(input);
+
+        // Assert
+        _mockUserRepository.Verify(x => x.DeleteAsync(input), Times.Once);
+        Assert.Equal(result, founded);
+    }
     
     private IUserService GetService() => new UserService(_mockUserRepository.Object, _mapper);
+
+    private LoginDto GenerateLoginDto()
+    {
+        return new LoginDto
+        {
+            Username = _faker.String2(15, 30),
+            Password = _faker.String2(15, 30)
+        };
+    }
     
-    private User GenerateUser()
+    private UserDto GenerateUserDto(int? id = null)
+    {
+        return new UserDto()
+        {
+            Id = id ?? _faker.Int(1),
+            FirstName = _faker.String2(1, 100),
+            LastName = _faker.String2(1, 100),
+            Username = _faker.String2(1, 100),
+            Email = _faker.String2(1, 100),
+            BirthDate = GenerateRandomDate()
+        };
+    }
+    
+    private User GenerateUser(int? id = null)
     {
         return new User()
         {
-            Id = _faker.Int(1),
+            Id = id ?? _faker.Int(1),
             FirstName = _faker.String2(1, 100),
             LastName = _faker.String2(1, 100),
             Username = _faker.String2(1, 100),

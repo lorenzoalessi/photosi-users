@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc;
 using PhotosiUsers.Dto;
 using PhotosiUsers.Exceptions;
 using PhotosiUsers.Service;
 
 namespace PhotosiUsers.Controllers;
 
+// Esclusi dalla code coverage perche' testabili tramite tramite eventualiu integration test al posto di unit test
+[ExcludeFromCodeCoverage]
 [Route("api/v1/users")]
 [ApiController]
 public class UserController : ControllerBase

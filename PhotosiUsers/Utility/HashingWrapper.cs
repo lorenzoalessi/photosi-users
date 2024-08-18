@@ -9,12 +9,10 @@ public static class HashingWrapper
     public static string ConvertToSha512(this string value)
     {
         // To byte
-        byte[] inputBytes = Encoding.UTF8.GetBytes(value);
-        
-        // Calcola l'hash SHA-512
-        using var sha512 = SHA512.Create();
+        var inputBytes = Encoding.UTF8.GetBytes(value);
 
-        var hashBytes = sha512.ComputeHash(inputBytes);
+        // Calcola l'hash SHA-512
+        var hashBytes = SHA512.HashData(inputBytes);
         return Convert.ToBase64String(hashBytes);
     }
 }

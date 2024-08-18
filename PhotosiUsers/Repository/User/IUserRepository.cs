@@ -2,5 +2,5 @@
 
 public interface IUserRepository : IGenericRepository<Model.User>
 {
-    Task<Model.User?> GetByUsernameAsync(string username);
+    Task<Model.User?> GetByUsernamePasswordAsync(string username, string password);
 }

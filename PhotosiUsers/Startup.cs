@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using PhotosiUsers.Model;
 using PhotosiUsers.Repository.User;
 using PhotosiUsers.Service;
 
 namespace PhotosiUsers;
 
+[ExcludeFromCodeCoverage]
 public class Startup
 {
     private readonly WebApplicationBuilder _builder;
